@@ -10,6 +10,8 @@
 
 Sandbox::Sandbox()
 {
+    m_precision = 50;
+
     std::uint32_t vboRect = 0;
     std::uint32_t vaoRect = 0;
     std::uint32_t eboRect = 0;
@@ -47,10 +49,22 @@ Sandbox::Sandbox()
 
 void Sandbox::update(float deltaTime)
 {
-   
+    //Send window size to shaders
+    int winSizeX;
+    int winSizeY;
+    glfwGetWindowSize(Application::instance()->getWindow(), &winSizeX, &winSizeY);
+    unsigned locWinSize = glGetUniformLocation(m_shader.getShaderID(), "u_windowSize");
+    glUniform2fv(locWinSize, 1, glm::value_ptr(glm::vec2(winSizeX, winSizeY)));
+
+    unsigned int locPrecision = glGetUniformLocation(m_shader.getShaderID(), "u_precision");
+    glUniform1i(locPrecision, m_precision);
 }
 
 void Sandbox::render()
 {
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    ImGui::Begin("Render");
+    ImGui::SliderInt("Precision", &m_precision, 1, 1000);
+    ImGui::End();
 }

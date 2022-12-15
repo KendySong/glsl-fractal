@@ -1,7 +1,9 @@
 #version 450 core
 out vec4 o_color;
+uniform vec2 u_windowSize;
+uniform int u_precision;
 
-float computeMandelBrot(vec2 c, int maxIteration)
+vec4 computeMandelBrot(vec2 c, int maxIteration)
 {
     vec2 z = vec2(0, 0);
     for (int i = 0; i < maxIteration; i++)
@@ -11,20 +13,18 @@ float computeMandelBrot(vec2 c, int maxIteration)
         
         if (sqrt(z.x * z.x + z.y * z.y) >= 2)
         {
-            return i / maxIteration;
+            float light = float(i) / maxIteration;
+            return vec4(0, light, 0, 1);
         }
     }
  
-    return 1;
+    return vec4(0, 0, 0, 1);
 }
 
 void main()
-{   
-    const int width = 1600;
-    const int height = 900;
-    
-    vec2 c =  gl_FragCoord.xy / vec2(width, height);
-    float result = computeMandelBrot(c, 1000);
+{       
+    vec2 c = 4 * (gl_FragCoord.xy - 0.5 * u_windowSize) / u_windowSize.x;
+    c.x -= 0.25;
 
-    o_color = vec4(result, 0, 0, 1);
+    o_color = computeMandelBrot(c, u_precision);
 }

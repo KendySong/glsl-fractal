@@ -8,15 +8,21 @@
 
 Application* Application::s_application = nullptr;
 
+void framebufferResizeCallback(GLFWwindow* window, int width, int height)
+{
+	glViewport(0, 0, width, height);
+}
+
 Application::Application() 
 {
 	glfwInit();
-	p_window = glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "OpenGL template", NULL, NULL);
+	p_window = glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "Fractal Generator", NULL, NULL);
 	glfwWindowHint(GLFW_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwMakeContextCurrent(p_window);
-	
+	glfwSetFramebufferSizeCallback(p_window, framebufferResizeCallback);
+
 	gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 	glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
 	glClearColor(0, 0, 0, 1);

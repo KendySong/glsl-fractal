@@ -16,4 +16,5 @@ public :
     
 private :
     Shader m_shader;
+    int m_precision;
 };
