@@ -1,3 +1,4 @@
+#include <iostream>
 #include <ImGui/imgui.h>
 #include <ImGui/imgui_impl_glfw.h>
 #include <ImGui/imgui_impl_opengl3.h>
@@ -7,6 +8,14 @@
 #include "Log.hpp"
 
 Application* Application::s_application = nullptr;
+void scroll_callback(GLFWwindow* window, double offsetX, double offsetY)
+{
+	float newZoom = Application::instance()->getSandbox()->getZoom() - offsetY * 0.1f;
+	if (newZoom >= 0)
+	{
+		Application::instance()->getSandbox()->getZoom() = newZoom;
+	}
+}
 
 void framebufferResizeCallback(GLFWwindow* window, int width, int height)
 {
@@ -22,6 +31,7 @@ Application::Application()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwMakeContextCurrent(p_window);
 	glfwSetFramebufferSizeCallback(p_window, framebufferResizeCallback);
+	glfwSetScrollCallback(p_window, scroll_callback);
 
 	gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 	glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
@@ -92,4 +102,9 @@ int Application::run()
 GLFWwindow* Application::getWindow() const noexcept
 {
 	return p_window;
+}
+
+Sandbox* Application::getSandbox() noexcept
+{
+	return p_sandbox;
 }

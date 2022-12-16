@@ -17,6 +17,8 @@ public:
 
 	GLFWwindow* getWindow() const noexcept;
 
+	Sandbox* getSandbox() noexcept; 
+
 private :
 	static Application* s_application;
 	GLFWwindow* p_window;

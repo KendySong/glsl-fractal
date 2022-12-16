@@ -1,3 +1,4 @@
+#include <iostream>
 #include <ImGui/imgui.h>
 #include <ImGui/imgui_impl_glfw.h>
 #include <ImGui/imgui_impl_opengl3.h>
@@ -12,10 +13,13 @@ Sandbox::Sandbox()
 {
     m_fps = 0;
     m_tempFps = 0;
+    m_zoom = 4;
+    m_first = true;
+    m_sensitivity = 0.001;
 
     m_precision = 50;
     m_animation = glm::vec2(0);
-    fractalsTypeName = { "Mandelbrot", "Julia" };
+    fractalsTypeName = { "Mandelbrot", "Julia", "Burning Ship"};
     m_fractalType = FractalType::mandelbrot;
     m_currentName = fractalsTypeName[0];
 
@@ -59,6 +63,8 @@ Sandbox::Sandbox()
 
 void Sandbox::update(float deltaTime)
 {
+    GLFWwindow* window = Application::instance()->getWindow();
+
     m_fps++;
     if (m_fpsTimer.getElapsedTime() >= 1)
     {
@@ -69,7 +75,7 @@ void Sandbox::update(float deltaTime)
 
     int winSizeX;
     int winSizeY;
-    glfwGetWindowSize(Application::instance()->getWindow(), &winSizeX, &winSizeY);
+    glfwGetWindowSize(window, &winSizeX, &winSizeY);
     unsigned locWinSize = glGetUniformLocation(m_shader.getShaderID(), "u_windowSize");
     glUniform2fv(locWinSize, 1, glm::value_ptr(glm::vec2(winSizeX, winSizeY)));
 
@@ -87,6 +93,43 @@ void Sandbox::update(float deltaTime)
 
     unsigned int locColorOut = glGetUniformLocation(m_shader.getShaderID(), "u_colorOut");
     glUniform3fv(locColorOut, 1, glm::value_ptr(m_colorOut));
+
+    unsigned int locZoom = glGetUniformLocation(m_shader.getShaderID(), "u_zoom");
+    glUniform1f(locZoom, m_zoom);
+
+    unsigned int locOffset = glGetUniformLocation(m_shader.getShaderID(), "u_offset");
+    glUniform2fv(locOffset, 1, glm::value_ptr(m_offset));
+   
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT))
+    {
+        double x, y;
+        glfwGetCursorPos(window, &x, &y);
+        glm::vec2 currentMouse = glm::vec2(x, y);
+
+        if (m_first)
+        {
+            m_lastMouse = currentMouse;
+            m_first = false;
+        }
+
+        if (!m_isClicking)
+        {
+            m_lastMouse = currentMouse;
+            m_isClicking = true;
+        }
+
+        glm::vec2 offset = currentMouse - m_lastMouse;
+        offset *= m_sensitivity;
+
+        m_offset.x -= offset.x;
+        m_offset.y += offset.y;
+        m_lastMouse = currentMouse;
+        m_isClicking = true;
+    }
+    else if (!glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT))
+    {
+        m_isClicking = false;
+    }
 }
 
 void Sandbox::render()
@@ -113,6 +156,11 @@ void Sandbox::render()
         ImGui::EndCombo();
     }
 
+    ImGui::InputFloat("Zoom", &m_zoom);
+
+    ImGui::SliderFloat("Offset X", &m_offset.x, -10, 10);
+    ImGui::SliderFloat("Offset Y", &m_offset.y, -10, 10);
+
     if (m_currentName == "Julia")
     {
         ImGui::TextUnformatted("Animation");
@@ -121,4 +169,9 @@ void Sandbox::render()
         ImGui::SliderFloat(" Y", &m_animation.y, -2.7, 1.7);
     }
     ImGui::End();
+}
+
+float& Sandbox::getZoom() noexcept
+{
+    return m_zoom;
 }

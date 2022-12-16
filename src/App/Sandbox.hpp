@@ -17,19 +17,28 @@ public :
     void update(float deltaTime);
 
     void render();
+
+    float& getZoom() noexcept;
     
 private :
+    Shader m_shader;
+
     int m_fps;
     int m_tempFps;
-    Timer m_fpsTimer;
+    Timer m_fpsTimer; 
 
-    Shader m_shader;
-    int m_precision;
+    float m_sensitivity;
+    glm::vec2 m_offset;
+    glm::vec2 m_lastMouse;
+    bool m_first;
+    bool m_isClicking;
 
+    float m_zoom;
     FractalType m_fractalType;
     std::vector<const char*> fractalsTypeName;
     const char* m_currentName;
 
+    int m_precision;
     glm::vec2 m_animation;
     glm::vec3 m_colorOut;
     glm::vec3 m_colorIn;
