@@ -8,10 +8,11 @@
 #include "Log.hpp"
 
 Application* Application::s_application = nullptr;
+
 void scroll_callback(GLFWwindow* window, double offsetX, double offsetY)
 {
-	float newZoom = Application::instance()->getSandbox()->getZoom() - offsetY * 0.1f;
-	if (newZoom >= 0)
+	float newZoom = Application::instance()->getSandbox()->getZoom() - offsetY * 0.10f;
+	if (newZoom > 0)
 	{
 		Application::instance()->getSandbox()->getZoom() = newZoom;
 	}

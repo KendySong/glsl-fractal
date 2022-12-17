@@ -1,9 +1,12 @@
 #version 450 core
+precision highp float;
+
 out vec4 o_color;
 
 uniform float u_zoom;
 uniform vec2 u_offset;
 uniform int u_precision;
+
 uniform vec2 u_windowSize;
 uniform int u_fractalType;
 

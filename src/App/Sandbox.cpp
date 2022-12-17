@@ -1,4 +1,3 @@
-#include <iostream>
 #include <ImGui/imgui.h>
 #include <ImGui/imgui_impl_glfw.h>
 #include <ImGui/imgui_impl_opengl3.h>
@@ -59,10 +58,20 @@ Sandbox::Sandbox()
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, false, sizeof glm::vec2, (void*)0);
+
+    m_locWinSize = glGetUniformLocation(m_shader.getShaderID(), "u_windowSize");
+    m_locPrecision = glGetUniformLocation(m_shader.getShaderID(), "u_precision");
+    m_locFractalType = glGetUniformLocation(m_shader.getShaderID(), "u_fractalType");
+    m_locAnimation = glGetUniformLocation(m_shader.getShaderID(), "u_animation");
+    m_locColorIn = glGetUniformLocation(m_shader.getShaderID(), "u_colorIn");
+    m_locColorOut = glGetUniformLocation(m_shader.getShaderID(), "u_colorOut");
+    m_locZoom = glGetUniformLocation(m_shader.getShaderID(), "u_zoom");
+    m_locOffset = glGetUniformLocation(m_shader.getShaderID(), "u_offset");
 }
 
 void Sandbox::update(float deltaTime)
 {
+    int winSizeX, winSizeY;
     GLFWwindow* window = Application::instance()->getWindow();
 
     m_fps++;
@@ -73,36 +82,10 @@ void Sandbox::update(float deltaTime)
         m_fpsTimer.restart();       
     }
 
-    int winSizeX;
-    int winSizeY;
-    glfwGetWindowSize(window, &winSizeX, &winSizeY);
-    unsigned locWinSize = glGetUniformLocation(m_shader.getShaderID(), "u_windowSize");
-    glUniform2fv(locWinSize, 1, glm::value_ptr(glm::vec2(winSizeX, winSizeY)));
-
-    unsigned int locPrecision = glGetUniformLocation(m_shader.getShaderID(), "u_precision");
-    glUniform1i(locPrecision, m_precision);
-
-    unsigned int locFractalType = glGetUniformLocation(m_shader.getShaderID(), "u_fractalType");
-    glUniform1i(locFractalType, (int)m_fractalType);
-
-    unsigned int locAnimation = glGetUniformLocation(m_shader.getShaderID(), "u_animation");
-    glUniform2fv(locAnimation, 1, glm::value_ptr(m_animation));
-
-    unsigned int locColorIn = glGetUniformLocation(m_shader.getShaderID(), "u_colorIn");
-    glUniform3fv(locColorIn, 1, glm::value_ptr(m_colorIn));
-
-    unsigned int locColorOut = glGetUniformLocation(m_shader.getShaderID(), "u_colorOut");
-    glUniform3fv(locColorOut, 1, glm::value_ptr(m_colorOut));
-
-    unsigned int locZoom = glGetUniformLocation(m_shader.getShaderID(), "u_zoom");
-    glUniform1f(locZoom, m_zoom);
-
-    unsigned int locOffset = glGetUniformLocation(m_shader.getShaderID(), "u_offset");
-    glUniform2fv(locOffset, 1, glm::value_ptr(m_offset));
-   
+    //Camera movement
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT))
     {
-        double x, y;
+        double x, y;      
         glfwGetCursorPos(window, &x, &y);
         glm::vec2 currentMouse = glm::vec2(x, y);
 
@@ -119,7 +102,7 @@ void Sandbox::update(float deltaTime)
         }
 
         glm::vec2 offset = currentMouse - m_lastMouse;
-        offset *= m_sensitivity;
+        offset *= m_sensitivity * m_zoom;
 
         m_offset.x -= offset.x;
         m_offset.y += offset.y;
@@ -130,6 +113,16 @@ void Sandbox::update(float deltaTime)
     {
         m_isClicking = false;
     }
+    
+    glfwGetWindowSize(window, &winSizeX, &winSizeY);
+    glUniform2fv(m_locWinSize, 1, glm::value_ptr(glm::vec2(winSizeX, winSizeY)));
+    glUniform1i(m_locPrecision, m_precision);
+    glUniform1i(m_locFractalType, (int)m_fractalType);
+    glUniform2fv(m_locAnimation, 1, glm::value_ptr(m_animation));
+    glUniform3fv(m_locColorIn, 1, glm::value_ptr(m_colorIn));
+    glUniform3fv(m_locColorOut, 1, glm::value_ptr(m_colorOut));
+    glUniform1f(m_locZoom, m_zoom);
+    glUniform2fv(m_locOffset, 1, glm::value_ptr(m_offset));   
 }
 
 void Sandbox::render()
@@ -157,10 +150,6 @@ void Sandbox::render()
     }
 
     ImGui::InputFloat("Zoom", &m_zoom);
-
-    ImGui::SliderFloat("Offset X", &m_offset.x, -10, 10);
-    ImGui::SliderFloat("Offset Y", &m_offset.y, -10, 10);
-
     if (m_currentName == "Julia")
     {
         ImGui::TextUnformatted("Animation");
@@ -168,7 +157,7 @@ void Sandbox::render()
         ImGui::SliderFloat(" X", &m_animation.x, -2.7, 1.7);
         ImGui::SliderFloat(" Y", &m_animation.y, -2.7, 1.7);
     }
-    ImGui::End();
+    ImGui::End();   
 }
 
 float& Sandbox::getZoom() noexcept
