@@ -3,6 +3,7 @@ Fractal generation with glsl shaders with glfw and OpenGL.</br>
 
 <img src="https://github.com/KendySong/glsl-fractal/blob/main/screenshots/mandelbrot.png">
 <img src="https://github.com/KendySong/glsl-fractal/blob/main/screenshots/julia.png">
+<img src="https://github.com/KendySong/glsl-fractal/blob/main/screenshots/burningship.png">
 
 ## How to take the projet
 ```git
