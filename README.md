@@ -8,6 +8,6 @@ Fractal generation with glsl shaders with glfw and OpenGL.</br>
 ## How to take the projet
 ```git
 - git clone --recursive https://github.com/KendySong/chip8-interpreter.git
-- cd chip8-interpreter
+- cd glsl-fractal
 - premake5 vs2022
 ```
